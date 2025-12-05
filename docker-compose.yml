@@ -1,0 +1,48 @@
+services:
+  # Backend - NestJS
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: pulgashop-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=4040
+      - DATABASE_URL=${DATABASE_URL}
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_FOLDER=${CLOUDINARY_FOLDER}
+    ports:
+      - "4040:4040"
+    networks:
+      - pulgashop-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4040/api/publicaciones"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend - React + Vite + Nginx
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: pulgashop-frontend
+    ports:
+      - "4041:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - pulgashop-network
+    restart: unless-stopped
+
+networks:
+  pulgashop-network:
+    driver: bridge
