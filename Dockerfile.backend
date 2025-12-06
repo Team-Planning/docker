@@ -6,13 +6,13 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copiar archivos de dependencias desde el repo
-COPY Back-end/package.json Back-end/pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 
 # Instalar pnpm
 RUN npm install -g pnpm
 
 # Copiar código fuente completo (necesario para prisma)
-COPY Back-end ./
+COPY . ./
 
 # Instalar TODAS las dependencias (incluyendo devDependencies para prisma y typescript)
 ENV CI=true
@@ -35,7 +35,7 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 # Copiar archivos de dependencias
-COPY Back-end/package.json Back-end/pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 
 # Instalar solo dependencias de producción
 ENV CI=true
