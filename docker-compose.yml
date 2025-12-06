@@ -1,6 +1,8 @@
 services:
   frontend:
     image: uribe22/pulgashop-frontend:latest
+    ports:
+      - "4041:80"
   backend:
     image: uribe22/pulgashop-backend:latest
     env_file:

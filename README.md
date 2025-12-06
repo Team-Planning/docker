@@ -1,124 +1,81 @@
-# PulgaShop Docker
+# Configuración de Docker para PulgaShop
 
-Esta carpeta contiene la configuración de Docker para orquestar el backend (NestJS + Prisma) y el frontend (React + Vite/Nginx) de PulgaShop.
+Este README proporciona instrucciones paso a paso para configurar y ejecutar el proyecto PulgaShop utilizando Docker.
 
-## Estructura
-```
-docker/
-├── docker-compose.yml      # Orquestación de servicios
-├── .env                    # Variables de entorno (desarrollo)
-├── .env.example            # Ejemplo de variables
-├── Dockerfile.backend      # Imagen del backend (NestJS)
-├── Dockerfile.frontend     # Imagen del frontend (React + Nginx)
-└── nginx/
-        └── nginx.conf          # Configuración de Nginx (proxy /api y SPA)
-```
+## Requisitos previos
 
-## Requisitos
-- Docker Desktop instalado y ejecutándose
-- Repositorios Back-end y Front-end clonados en `../Back-end` y `../Front-end`
+1. **Instalar Docker Desktop**
+   - Descarga e instala Docker Desktop desde [el sitio oficial de Docker](https://www.docker.com/products/docker-desktop).
+   - Asegúrate de que Docker Desktop esté en ejecución.
 
-## Variables de entorno
-Edita `docker/.env` (o copia desde `.env.example`) con las variables necesarias:
+2. **Instalar Git**
+   - Descarga e instala Git desde [el sitio oficial de Git](https://git-scm.com/).
 
-```
-DATABASE_URL=
-MONGODB_URI=
-JWT_SECRET=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
+## Pasos para configurar PulgaShop
 
-Nota: En entorno escolar puedes usar credenciales públicas de desarrollo. En producción usa secretos distintos e inyectados por CI/CD.
+### 1. Clonar el repositorio
 
-## Uso
-
-### Construir y ejecutar (PowerShell)
-```powershell
-cd "C:\Users\um_lo\Desktop\PulgaShop\docker"
-docker compose up -d --build
-docker compose ps
-```
-
-### Ver logs
-```powershell
-docker compose logs -f backend
-docker compose logs -f frontend
-```
-
-### Detener servicios
-```powershell
-docker compose down
-```
-
-## Puertos
-- Backend: http://localhost:4040/api
-- Frontend: http://localhost:4041
-
-## Nginx
-`nginx/nginx.conf` enruta `location /api/` al backend (`http://backend:4040/api/`) y aplica fallback de SPA para rutas del frontend.
-
-## Troubleshooting
-- PNPM/Prisma (backend):
-    - El Dockerfile debe ejecutar `pnpm install` y `pnpm prisma generate` en el build.
-    - Si falla por DNS/registry, reintenta `docker compose build`.
-- TypeScript (frontend):
-    - Corrige imports/variables no usadas (TS6133) y vuelve a construir.
-- Base de datos:
-    - Verifica `DATABASE_URL`/`MONGODB_URI` en `docker/.env`.
-- Puertos ocupados:
-    - Ajusta mapeos `4040`/`4041` en `docker-compose.yml` si están en uso.
-
-## Desarrollo local (sin Docker)
-- Backend:
-    ```powershell
-    cd "C:\Users\um_lo\Desktop\PulgaShop\Back-end"; pnpm install; pnpm prisma generate; pnpm run start:dev
-    ```
-- Frontend:
-    ```powershell
-    cd "C:\Users\um_lo\Desktop\PulgaShop\Front-end"; npm install; npm run dev
-    ```
-# PulgaShop Docker
-
-Esta carpeta contiene la configuración de Docker para orquestar el backend y frontend de PulgaShop.
-
-## Estructura
-```
-docker/
-├── docker-compose.yml      # Orquestación de servicios
-├── .env                    # Variables de entorno
-├── Dockerfile.backend      # Imagen del backend (NestJS)
-├── Dockerfile.frontend     # Imagen del frontend (React + Nginx)
-└── nginx/
-    └── nginx.conf          # Configuración de Nginx
-```
-
-## Requisitos
-- Docker Desktop instalado y ejecutándose
-- Repositorios Back-end y Front-end clonados en `../Back-end` y `../Front-end`
-
-## Uso
-
-### Construir y ejecutar
+Clona el repositorio de Docker que contiene los archivos de configuración:
 ```bash
+git clone https://github.com/Team-Planning/docker.git
 cd docker
-docker compose up --build -d
 ```
 
-### Ver logs
+### 2. Descargar las imágenes de Docker
+
+Asegúrate de tener acceso al repositorio de Docker Hub y descarga las imágenes necesarias:
 ```bash
-docker compose logs -f
+docker pull uribe22/pulgashop-frontend:latest
+docker pull uribe22/pulgashop-backend:latest
 ```
 
-### Detener servicios
+### 3. Configurar las variables de entorno
+
+Crea un archivo `.env` en la carpeta `docker` con el siguiente contenido:
+```env
+CLOUDINARY_API_KEY=tu_api_key_de_cloudinary
+CLOUDINARY_API_SECRET=tu_api_secret_de_cloudinary
+CLOUDINARY_CLOUD_NAME=tu_nombre_de_cloudinary
+CLOUDINARY_FOLDER=pulgashop/publicaciones
+DATABASE_URL=tu_url_de_base_de_datos
+JWT_EXPIRES_IN=1d
+JWT_SECRET=tu_secreto_jwt
+MONGODB_URI=tu_uri_de_mongodb
+```
+Reemplaza los valores `tu_*` con las credenciales reales.
+
+### 4. Ejecutar Docker Compose
+
+Inicia los servicios utilizando Docker Compose:
+```bash
+docker compose up -d
+```
+Esto iniciará los servicios de frontend y backend.
+
+### 5. Verificar los servicios
+
+- **Frontend:** Abre un navegador y navega a `http://localhost:4041`.
+- **Backend:** Verifica el endpoint de salud en `http://localhost:4040/api/health`.
+
+### 6. Detener los servicios
+
+Para detener los servicios, ejecuta:
 ```bash
 docker compose down
 ```
 
-## Puertos
-- **Backend**: http://localhost:4040/api
-- **Frontend**: http://localhost:4041
+## Notas
 
-## Configuración
-Edita el archivo `.env` con tus credenciales de MongoDB Atlas y Cloudinary.
+- Asegúrate de que las imágenes `uribe22/pulgashop-frontend` y `uribe22/pulgashop-backend` sean accesibles desde Docker Hub.
+- Si encuentras problemas, revisa los logs:
+  ```bash
+  docker logs docker-frontend-1
+  docker logs docker-backend-1
+  ```
+
+## Solución de problemas
+
+- **Frontend no accesible:** Asegúrate de que el puerto `4041` esté correctamente mapeado en `docker-compose.yml`.
+- **Backend en estado unhealthy:** Verifica la conexión a la base de datos y el endpoint de salud.
+
+Para más asistencia, contacta al mantenedor del repositorio.
