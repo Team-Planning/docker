@@ -1,10 +1,10 @@
 services:
   frontend:
-    image: uribe22/pulgashop-frontend:latest
+    image: pulgashop-frontend:local
     ports:
       - "4041:80"
   backend:
-    image: uribe22/pulgashop-backend:latest
+    image: pulgashop-backend:local
     env_file:
       - ./.env
     ports:
